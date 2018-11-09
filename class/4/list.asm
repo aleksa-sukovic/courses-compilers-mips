@@ -5,9 +5,13 @@ main:
 
     # Inserting elements into list
     li $a1, 10
-    jal insert_end  
+    jal insert_begin  
     li $a1, 5
-    jal insert_end  
+    jal insert_begin
+    li $a1, 53
+    jal insert_begin 
+    li $a1, 15
+    jal insert_end
 
     # Printing list
     jal print_list
@@ -54,7 +58,7 @@ insert_begin:
     syscall   # in $v0 address of allocated memory
 
     sw $a1, 0($v0) # value at addres found in $v0 in first 4 bytes
-    sw $a0, 4($v0) # address of old head in next 4 bytes
+    sw $s0, 4($v0) # address of old head in next 4 bytes
     
     move $a0, $v0 # new list head in $a0
 
