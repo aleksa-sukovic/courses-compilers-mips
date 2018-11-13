@@ -10,19 +10,78 @@ main:
     move $s0, $v0 # string length in $s0
 
     # FREQUENCY
-    la $a0, string_space
-    jal frequency
-    move $s1, $v0 # result in $s1
+    # la $a0, string_space
+    # jal frequency
+    # move $s1, $v0 # result in $s1
 
-    la $a0, frequency_output_msg
-    li $v0, 4
-    syscall # Frequency output message
-    move $a0, $s1
-    li $v0, 11
-    syscall    # printing character
+    # la $a0, frequency_output_msg
+    # li $v0, 4
+    # syscall # Frequency output message
+    # move $a0, $s1
+    # li $v0, 11
+    # syscall    # printing character
+
+    la $a0, string_space
+    jal brojRotacija
 
     li $v0, 10
     syscall
+
+brojRotacija:
+    move $s0, $a0   # original string in $s0
+    sub $sp, $sp, 4 
+    sw $ra, 0($sp)   # saving return address to stack
+
+    jal copyStr
+    move $s1, $v0    # copied string in $s1
+
+    move $a0, $s1
+    jal rotate_str
+
+    move $a0, $s1
+    li $v0, 4
+    syscall
+
+    lw $ra, 0($sp)
+    add $sp, $sp, 4
+
+rotate_str:
+    
+
+copyStr:
+    sub $sp, $sp, 4
+    sw $ra, 0($sp)  # saving return address to stack
+    
+    # Calculating original string length
+    jal  string_length
+    move $t1, $v0     # length of original string in $t1
+    add  $t1, $t1, 1   # 1 more byte for string terminator
+    
+    # Setting up local variables
+    move $t0, $a0   # addres of original string in $t0
+    li   $t3, 0       # loop counter
+
+    # Alocating space for copy array
+    move $a0, $t1
+    li $v0, 9
+    syscall           # allocating space for new string
+    move $t2, $v0     # address of copy string in $t2
+
+    # Copying elements
+    move $t5, $t2     # address of current character in copy string
+    copy_loop:
+        beq $t3, $t1, copy_loop_end
+            lb $t4, 0($t0)  # loading next character
+            sb $t4, 0($t5)  # storing next character into copy string
+            add $t0, $t0, 1 # advancing to next character in original string
+            add $t5, $t5, 1 # advancing to next character in copy string
+            add $t3, $t3, 1 # advancing counter
+            j copy_loop
+    copy_loop_end:
+        lw $ra, 0($sp)
+        add $sp, $sp, 4
+        move $v0, $t2
+        jr $ra
 
 frequency:
     move $s0, $a0       # string in $s0
