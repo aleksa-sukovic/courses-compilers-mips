@@ -10,43 +10,141 @@ main:
     move $s0, $v0 # string length in $s0
 
     # FREQUENCY
-    # la $a0, string_space
-    # jal frequency
-    # move $s1, $v0 # result in $s1
+    la $a0, string_space
+    jal frequency
+    move $s1, $v0 # result in $s1
 
-    # la $a0, frequency_output_msg
-    # li $v0, 4
-    # syscall # Frequency output message
-    # move $a0, $s1
-    # li $v0, 11
-    # syscall    # printing character
+    la $a0, frequency_output_msg
+    li $v0, 4
+    syscall # Frequency output message
+    move $a0, $s1
+    li $v0, 11
+    syscall    # printing character
+
+    addi $a0, $0, 0xA # ascii code for LF
+    addi $v0, $0, 0xB
+    syscall
 
     la $a0, string_space
     jal brojRotacija
+    move $t0, $v0
+    
+    la $a0, rotation_number_output_msg
+    li $v0, 4
+    syscall # BrojRotacija output message
+    move $a0, $t0
+    li $v0, 1
+    syscall # printing brojRotacija function result
 
     li $v0, 10
     syscall
 
 brojRotacija:
-    move $s0, $a0   # original string in $s0
-    sub $sp, $sp, 4 
-    sw $ra, 0($sp)   # saving return address to stack
+   # $a0 -> string
+   sub $sp, $sp, 8
+   sw $ra, 0($sp)
+   sw $a0, 4($sp)
+   
+   jal copyStr
+   move $s0, $v0  # copied string in $s0
+   
+   move $a0, $s0
+   jal string_length
+   move $t0, $v0 # string length in $t0
+   
+   li $s1, 0      # number of finished rotations
+   
+   rotation_loop:
+  	beq $s1, $t0, rotation_loop_end
+  	    move $a0, $s0
+  	    jal rotateStr
+  	    move $s0, $v0
+  	    add $s1, $s1, 1
+  	    
+  	    lw $a0, 4($sp) # original string in $a0
+  	    move $a1, $s0  # copy string in $a1
+  	    jal str_eq
+  	    
+  	    beq $v0, 1, found_match
+  	        j rotation_loop
+  	    
+  	    found_match:
+  	    	j rotation_loop_end
+  	
+  rotation_loop_end:
+  	move $v0, $s1
+  	lw $ra, 0($sp)
+  	add $sp, $sp, 8
+  	jr $ra
 
-    jal copyStr
-    move $s1, $v0    # copied string in $s1
-
-    move $a0, $s1
-    jal rotate_str
-
-    move $a0, $s1
-    li $v0, 4
-    syscall
-
-    lw $ra, 0($sp)
-    add $sp, $sp, 4
-
-rotate_str:
+str_eq:
+    # $a0 -> first string
+    # $a1 -> second string
+    # $v0 -> 1 if equal, 0 if not
+    # assumes both string are of equal lengths
+    sub $sp, $sp, 4
+    sw $ra, 0($sp)
     
+    jal string_length
+    move $t0, $v0 # string length in $t0
+    li $v0, 1 # result
+    li $t1, 0 # counter
+    
+    str_eq_loop:
+    	beq $t1, $t0 str_eq_loop_end
+    	   lb $t3, 0($a0)
+    	   lb $t4, 0($a1)
+    	   
+    	   beq $t3, $t4, advance_loop_str_eq
+    	   	# charaters do not match
+    	        li $v0, 0
+   		j str_eq_loop_end
+    	        
+    	   advance_loop_str_eq:
+    	   	# characters do match
+    	   	add $a0, $a0, 1
+    	   	add $a1, $a1, 1
+    	   	add $t1, $t1, 1
+    	   	j str_eq_loop
+    		
+    str_eq_loop_end:
+    	lw $ra, 0($sp)
+    	add $sp, $sp, 4
+    	jr $ra
+
+rotateStr:
+    # $t0 -> string
+    # $t1 -> string length
+    # $t2 -> counter
+    sub $sp, $sp, 8
+    sw $ra, 0($sp)
+    sw $a0, 4($sp)
+    
+    	jal string_length
+    	lw $t0, 4($sp)
+    	move $t1, $v0     # string length in $t1
+    	li $t2, 1         # counter
+    	
+    	move $t3, $t0
+    	add $t3, $t3, 1   # current character address in $t3
+    	lb $t4, 0($t0)    # previous character
+    	
+    	rotate_str_loop:
+    	   beq $t2, $t1, rotate_str_loop_end
+    	     lb $t5, 0($t3)  # save current char
+    	     sb $t4, 0($t3)
+    	     move $t4, $t5
+    	     
+    	     add $t3, $t3, 1
+    	     add $t2, $t2, 1
+    	     b rotate_str_loop
+    	   
+    	rotate_str_loop_end:
+    	     sb $t4, 0($t0)
+    	     lw $v0, 4($sp)
+    	     lw $ra, 0($sp)
+    	     add $sp, $sp, 8
+    	     jr $ra
 
 copyStr:
     sub $sp, $sp, 4
@@ -157,3 +255,4 @@ string_length:
     count_space: .space 104
     string_space: .space 1000
     frequency_output_msg: .asciiz "Karakter sa najvecim brojem ponavljanja je: "
+    rotation_number_output_msg: .asciiz "Mininalan broj rotacija: "
