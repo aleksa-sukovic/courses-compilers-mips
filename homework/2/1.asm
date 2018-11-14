@@ -55,19 +55,19 @@ poly:
 		sub $a0, $a0, 1    # n = n - 1
 		jal poly
 	
-		add $a1, $a1, 2    # sum = 3a + 2
-		mulo $a3, $a3, $a2 # x^n = x^n * x
+		add $a1, $a1, 2    # sum = (3a + 2), (3a + 4), ...
+		mulo $a3, $a3, $a2 # x^n = x^(n-1) * x
 		
 		move $t0, $a1      # $t0 = sum
 		mulo $t0, $t0, $a3 # $t0 = sum * x^n
 		
-		add $v0, $v0, $t0
+		add $v0, $v0, $t0  # result = sum * x^n
 		b end
 	
 	base_case:
 		mulo $a1, $a1, 3 # a = 3a
 		move $v0, $a1    # sum = 3a
-		li $a3, 1        # x^n = 1
+		li $a3, 1        # x^0 = 1
 	
 	end:
 		lw $ra, 0($sp)  # restoring return address

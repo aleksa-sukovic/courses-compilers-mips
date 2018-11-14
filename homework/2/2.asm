@@ -17,22 +17,22 @@ main:
 	# Load array
 	la $a0, array # address in $a0
 	move $a1, $s0 # length in $a1
-	jal loadArray 
+	jal ucitajNiz 
 	
 	# Print array
 	la $a0, array
 	move $a1, $s0
-	jal printArray # printing array
+	jal stampaNiza # printing array
 	
 	# Find minimum
 	la $a0, array
 	move $a1, $s0
-	jal findMin 
+	jal nadjiMin 
 	move $s1, $v0 # minimum in $s1
 	
 	la $a0, minoutputmsg
 	li $v0, 4
-	syscall # printing output message for 'findMin' function
+	syscall # printing output message for 'nadjiMin' function
 	move $a0, $s1
 	li $v0, 1
 	syscall       # printing minimum
@@ -70,6 +70,7 @@ findElem:
 	
 	beq $t1, 0, element_not_found
 		
+		# Calculating element address based on current array length
 		move $t3, $t1     # current length of array
 		sub $t3, $t3, 1   # length = length  - 1
 		mulo $t3, $t3, 4  # calculating element offset
@@ -97,14 +98,14 @@ findElem:
 		jr $ra
 
 
-findMin:
+nadjiMin:
 	move $t0, $a0 # address of first element in $t0
 	move $t1, $a1 # length of array in $t1
 	li $t2, 1     # counter in $t2
 	lw $t3, 0($t0)# minimum is first element
 	
 	find_min_loop:
-		beq $t2, $t1, end_find_min_loop
+		beq $t2, $t1, find_min_loop_end
 		
 		lw $t4, 0($t0) # next element in $t4
 		blt $t4, $t3, new_min # current element is < current minimum
@@ -118,11 +119,11 @@ findMin:
 			add $t2, $t2, 1 # counter += 1
 			b find_min_loop
 		
-	end_find_min_loop:
+	find_min_loop_end:
 		move $v0, $t3
 		jr $ra
 			
-printArray:
+stampaNiza:
 	move $t0, $a0 # address of first element in $t0
 	move $t1, $a1 # length of array in $t1
 	li $t2, 0      # counter
@@ -149,7 +150,7 @@ printArray:
 		
 		jr $ra
 	
-loadArray:
+ucitajNiz:
 	move $t0, $a0 # address of first element in $t0
 	move $t1, $a1 # length of array in $t1
 	li $t2, 0     # counter = 0

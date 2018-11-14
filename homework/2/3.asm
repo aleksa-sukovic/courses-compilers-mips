@@ -1,6 +1,10 @@
 .text
 
 main:
+    la $a0, input_msg
+    li $v0, 4
+    syscall # input message
+
     la $a0, string_space
     li $a1, 1000
     li $v0, 8
@@ -65,11 +69,8 @@ brojRotacija:
   	    move $a1, $s0  # copy string in $a1
   	    jal str_eq
   	    
-  	    beq $v0, 1, found_match
+  	    beq $v0, 1, rotation_loop_end
   	        j rotation_loop
-  	    
-  	    found_match:
-  	    	j rotation_loop_end
   	
   rotation_loop_end:
   	move $v0, $s1
@@ -197,17 +198,17 @@ frequency:
         j initialization_loop
     
     count_frequencies:
-        move $t0, $s0                           # current character address in $t0
+        move $t0, $s0                            # current character address in $t0
         count_frequency_loop:
-            lb $t1, 0($t0)                      # load ascii code for current character
-            beqz $t1, count_frequency_loop_end # end of string
-                sub $t1, $t1, 97               # index in alphabet of current character
-                mul $t1, $t1, 4                # index in count array of current character
-                add $t1, $t1, $s1              # address in count array of current character
+            lb $t1, 0($t0)                       # load ascii code for current character
+            beqz $t1, count_frequency_loop_end   # end of string
+                sub $t1, $t1, 97                 # index in alphabet of current character
+                mul $t1, $t1, 4                  # index in count array of current character
+                add $t1, $t1, $s1                # address in count array of current character
 
-                lw $t2, 0($t1)                  # number of repetition of current character in $t2
-                add $t2, $t2, 1                 # incrementing number of repetitions
-                sw $t2, 0($t1)                  # storing number of repetitions
+                lw $t2, 0($t1)                   # number of repetition of current character in $t2
+                add $t2, $t2, 1                  # incrementing number of repetitions
+                sw $t2, 0($t1)                   # storing number of repetitions
 
                 add $t0, $t0, 1                  # advancing counter to next character
                 j count_frequency_loop
@@ -256,3 +257,4 @@ string_length:
     string_space: .space 1000
     frequency_output_msg: .asciiz "Karakter sa najvecim brojem ponavljanja je: "
     rotation_number_output_msg: .asciiz "Mininalan broj rotacija: "
+    input_msg: .asciiz "Unesite string: "
