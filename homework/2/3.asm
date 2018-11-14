@@ -54,12 +54,12 @@ brojRotacija:
    
    move $a0, $s0
    jal string_length
-   move $t0, $v0 # string length in $t0
+   move $s2, $v0 # string length in $t0
    
    li $s1, 0      # number of finished rotations
    
    rotation_loop:
-  	beq $s1, $t0, rotation_loop_end
+  	beq $s1, $s2, rotation_loop_end
   	    move $a0, $s0
   	    jal rotateStr
   	    move $s0, $v0
