@@ -16,14 +16,43 @@ main:
     jal add_start
     
     move $a0, $v0
-    li $a1, 12
-    jal delete
+    li $a1, 15
+    jal delete_r
     
     move $a0, $v0
     jal print_r
 
     li $v0, 10
     syscall
+
+delete_r:
+    # $a0 = list head
+    # $a1 = node value to delete
+    # $v0 = new list head
+    sub $sp, $sp, 8
+    sw $ra, 0($sp)  # saving return address to stack
+    sw $a0, 4($sp)  # saving list head to stack
+    beqz $a0, delete_r_base_case
+        lw $t0, 0($a0)
+        beq $t0, $a1, delete_r_element_found
+            lw $a0, 4($a0)
+            jal delete_r
+            # address of new list head in $v0
+            lw $t0, 4($sp) # old list head
+            sw $v0, 4($t0) # old.next = new head
+            move $v0, $t0
+            j delete_r_end
+        delete_r_element_found:
+            lw $v0, 4($a0) # current_head = current_head.next
+            j delete_r_end
+
+    delete_r_base_case:
+        li $v0, 0
+
+    delete_r_end:
+        lw $ra, 0($sp)
+        add $sp, $sp, 8
+        jr $ra
 
 delete:
     # $a0 = list head
