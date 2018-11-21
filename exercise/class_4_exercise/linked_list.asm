@@ -5,22 +5,57 @@
 main:
     xor $a0, $a0, $a0
     li $a1, 12
-    jal add_start
+    jal add_end
     
     move $a0, $v0
     li $a1, 41
-    jal add_start
+    jal add_end
     
     move $a0, $v0
     li $a1, 15
-    jal add_start
+    jal add_end
     
     move $a0, $v0
     jal print_r
 
-
     li $v0, 10
     syscall
+
+add_end:
+    # $a0 = list head
+    # $a1 = new node value
+    # $v0 = list head
+    move $t0, $a0 # saving list head
+    
+    # allocating space for new node
+    li $a0, 8
+    li $v0, 9
+    syscall 
+    sw $a1, 0($v0) # storing node value
+    sw $0, 4($v0)  # storing 0 as address of next element
+    
+    move $t1, $v0  # new node in $t0
+    move $t2, $t0  # current node address in $t0
+    
+    beqz $t2, add_end_list_empty # special case, list is empty
+        add_end_loop:
+            lw $t3, 4($t2)
+            beqz $t3, add_end_loop_end
+            move $t2, $t3
+            j add_end_loop
+            
+        add_end_loop_end:
+            # add new node to end
+            sw $t1, 4($t2)
+            move $v0, $t0
+            j end
+            
+    add_end_list_empty:
+        move $v0, $t1
+        j end
+       
+    end:
+    	jr $ra
 
 add_start:
     # $a0 = list head
